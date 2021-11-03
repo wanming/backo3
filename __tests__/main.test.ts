@@ -1,42 +1,42 @@
-import { Delays, greeter } from '../src/main';
+import Backoff from '../src/Backoff';
 
-describe('greeter function', () => {
-  const name = 'John';
-  let hello: string;
+describe('.duration()', () => {
+  const min = 100;
+  const max = 10000;
+  it('should increase the backoff', () => {
+    const b = new Backoff({ min, max });
 
-  let timeoutSpy: jest.SpyInstance;
-
-  // Act before assertions
-  beforeAll(async () => {
-    // Read more about fake timers
-    // http://facebook.github.io/jest/docs/en/timer-mocks.html#content
-    // Jest 27 now uses "modern" implementation of fake timers
-    // https://jestjs.io/blog/2021/05/25/jest-27#flipping-defaults
-    // https://github.com/facebook/jest/pull/5171
-    jest.useFakeTimers();
-    timeoutSpy = jest.spyOn(global, 'setTimeout');
-
-    const p: Promise<string> = greeter(name);
-    jest.runOnlyPendingTimers();
-    hello = await p;
+    expect(b.duration()).toBe(100);
+    expect(b.duration()).toBe(200);
+    expect(b.duration()).toBe(400);
+    expect(b.duration()).toBe(800);
+    b.reset();
+    expect(b.duration()).toBe(100);
+    expect(b.duration()).toBe(200);
   });
 
-  // Teardown (cleanup) after assertions
-  afterAll(() => {
-    timeoutSpy.mockRestore();
+  it('should increase the backoff with jitter', () => {
+    let i = 0;
+    const b = new Backoff({ min, max, jitter: 0.5 });
+
+    while (i < 1e3) {
+      const d = b.duration();
+      const t = 100 * Math.pow(2, i);
+      if (d === max) {
+        break;
+      }
+      expect(d).toBeGreaterThan(t * 0.5);
+      expect(d).toBeLessThan(t * 1.5);
+      i++;
+    }
   });
 
-  // Assert if setTimeout was called properly
-  it('delays the greeting by 2 seconds', () => {
-    expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenLastCalledWith(
-      expect.any(Function),
-      Delays.Long,
-    );
-  });
+  it('should return max after too many invokes with jitter', () => {
+    const b = new Backoff({ min, max, jitter: 0.5 });
 
-  // Assert greeter result
-  it('greets a user with `Hello, {name}` message', () => {
-    expect(hello).toBe(`Hello, ${name}`);
+    for (let i = 0; i < 1e5; i++) {
+      b.duration();
+    }
+    expect(b.duration()).toBe(max);
   });
 });

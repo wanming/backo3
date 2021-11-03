@@ -1,10 +1,15 @@
 {
-  "name": "node-typescript-boilerplate",
-  "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "name": "backo3",
+  "version": "0.0.1",
+  "description": "simple backoff based on mokesmokes/backo",
   "engines": {
-    "node": ">= 16.13 <17"
+    "node": ">= 10"
   },
+  "files": [
+    "build"
+  ],
+  "types": "build/Backoff.d.ts",
+  "main": "./build/Backoff.js",
   "devDependencies": {
     "@types/jest": "~27.0.2",
     "@types/node": "~16.11.6",
@@ -30,12 +35,7 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
-  "author": "Jakub Synowiec <jsynowiec@users.noreply.github.com>",
-  "license": "Apache-2.0",
-  "dependencies": {
-    "tslib": "~2.3.1"
-  },
-  "volta": {
-    "node": "16.13.0"
-  }
+  "author": "Tom Wan<wanmingtom@gmail.com>",
+  "license": "MIT",
+  "dependencies": {}
 }
